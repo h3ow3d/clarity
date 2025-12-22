@@ -13,21 +13,20 @@ on:
 env:
   AWS_REGION: eu-west-2
   NODE_VERSION: '20'
-  HUSKY: 0
 
 jobs:
   build-and-deploy:
     name: Build and Deploy Backend
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: read
       id-token: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      
+
       - name: Build Lambda functions
         uses: h3ow3d/h3ow3d-github-actions/actions/node-build-test@v1.0.0
         with:
@@ -35,7 +34,7 @@ jobs:
           working-directory: 'apps/api'
           type-check-command: 'npm run type-check'
           build-command: 'npm run build'
-      
+
       - name: Configure AWS credentials
         uses: h3ow3d/h3ow3d-github-actions/actions/aws-configure@v1.0.0
         with:
@@ -43,14 +42,14 @@ jobs:
           auth-method: 'oidc'
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           role-session-name: 'GitHubActions-Deploy'
-      
+
       - name: Deploy infrastructure
         uses: h3ow3d/h3ow3d-github-actions/actions/terraform-deploy@v1.0.0
         with:
           terraform-version: '1.5.0'
           working-directory: 'infra/terraform'
           auto-approve: 'true'
-      
+
       - name: Get API Endpoint
         id: api-endpoint
         working-directory: infra/terraform
@@ -58,7 +57,7 @@ jobs:
           ENDPOINT=$(terraform output -raw api_endpoint)
           echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
           echo "::notice::API Endpoint: $ENDPOINT"
-      
+
       - name: Deployment Summary
         run: |
           echo "## 🚀 Deployment Successful" >> $GITHUB_STEP_SUMMARY
