@@ -86,35 +86,14 @@ cat > /tmp/clarity-deploy-policy.json <<EOF
     {
       "Effect": "Allow",
       "Action": [
-        "dynamodb:CreateTable",
-        "dynamodb:DescribeTable",
-        "dynamodb:UpdateTable",
-        "dynamodb:DeleteTable",
-        "dynamodb:TagResource",
-        "dynamodb:UntagResource",
-        "dynamodb:ListTagsOfResource",
-        "dynamodb:DescribeTimeToLive",
-        "dynamodb:UpdateTimeToLive",
-        "dynamodb:DescribeContinuousBackups",
-        "dynamodb:UpdateContinuousBackups"
+        "dynamodb:*"
       ],
       "Resource": "arn:aws:dynamodb:eu-west-2:${AWS_ACCOUNT_ID}:table/*-clarity-*"
     },
     {
       "Effect": "Allow",
       "Action": [
-        "lambda:CreateFunction",
-        "lambda:UpdateFunctionCode",
-        "lambda:UpdateFunctionConfiguration",
-        "lambda:GetFunction",
-        "lambda:GetFunctionCodeSigningConfig",
-        "lambda:DeleteFunction",
-        "lambda:AddPermission",
-        "lambda:RemovePermission",
-        "lambda:ListVersionsByFunction",
-        "lambda:PublishVersion",
-        "lambda:TagResource",
-        "lambda:UntagResource"
+        "lambda:*"
       ],
       "Resource": "arn:aws:lambda:eu-west-2:${AWS_ACCOUNT_ID}:function:*-clarity-*"
     },
@@ -128,19 +107,7 @@ cat > /tmp/clarity-deploy-policy.json <<EOF
     {
       "Effect": "Allow",
       "Action": [
-        "iam:CreateRole",
-        "iam:GetRole",
-        "iam:DeleteRole",
-        "iam:AttachRolePolicy",
-        "iam:DetachRolePolicy",
-        "iam:PutRolePolicy",
-        "iam:GetRolePolicy",
-        "iam:DeleteRolePolicy",
-        "iam:ListRolePolicies",
-        "iam:ListAttachedRolePolicies",
-        "iam:PassRole",
-        "iam:TagRole",
-        "iam:UntagRole"
+        "iam:*"
       ],
       "Resource": [
         "arn:aws:iam::${AWS_ACCOUNT_ID}:role/*-clarity-*"
@@ -149,13 +116,7 @@ cat > /tmp/clarity-deploy-policy.json <<EOF
     {
       "Effect": "Allow",
       "Action": [
-        "logs:CreateLogGroup",
-        "logs:DeleteLogGroup",
-        "logs:ListTagsLogGroup",
-        "logs:ListTagsForResource",
-        "logs:PutRetentionPolicy",
-        "logs:TagLogGroup",
-        "logs:UntagLogGroup"
+        "logs:*"
       ],
       "Resource": "arn:aws:logs:eu-west-2:${AWS_ACCOUNT_ID}:log-group:/aws/*clarity*"
     },
