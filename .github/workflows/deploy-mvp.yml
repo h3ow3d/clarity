@@ -1,0 +1,105 @@
+name: Deploy Clarity MVP
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/api/**'
+      - 'infra/terraform/**'
+      - '.github/workflows/deploy-mvp.yml'
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: '20'
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy Backend
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      id-token: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          cd apps/api
+          npm ci
+      
+      - name: Type check
+        run: |
+          cd apps/api
+          npm run type-check
+      
+      - name: Build Lambda functions
+        run: |
+          cd apps/api
+          npm run build
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: GitHubActions-Deploy
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+      
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: terraform init
+      
+      - name: Terraform Format Check
+        working-directory: infra/terraform
+        run: terraform fmt -check
+        continue-on-error: true
+      
+      - name: Terraform Validate
+        working-directory: infra/terraform
+        run: terraform validate
+      
+      - name: Terraform Plan
+        working-directory: infra/terraform
+        run: terraform plan -out=tfplan
+        env:
+          TF_VAR_environment: dev
+          TF_VAR_aws_region: ${{ env.AWS_REGION }}
+      
+      - name: Terraform Apply
+        working-directory: infra/terraform
+        run: terraform apply -auto-approve tfplan
+      
+      - name: Get API Endpoint
+        id: api-endpoint
+        working-directory: infra/terraform
+        run: |
+          ENDPOINT=$(terraform output -raw api_endpoint)
+          echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
+          echo "::notice::API Endpoint: $ENDPOINT"
+      
+      - name: Deployment Summary
+        run: |
+          echo "## 🚀 Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**API Endpoint:** \`${{ steps.api-endpoint.outputs.endpoint }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Deployed Resources" >> $GITHUB_STEP_SUMMARY
+          echo "- DynamoDB Attempts Table" >> $GITHUB_STEP_SUMMARY
+          echo "- 5 Lambda Functions (submit, get, list attempts, get, list scenarios)" >> $GITHUB_STEP_SUMMARY
+          echo "- API Gateway REST API" >> $GITHUB_STEP_SUMMARY
+          echo "- IAM Roles with DynamoDB and Bedrock permissions" >> $GITHUB_STEP_SUMMARY
