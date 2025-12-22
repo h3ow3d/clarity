@@ -20,7 +20,7 @@ terraform {
   backend "s3" {
     bucket = "clarity-terraform-state"
     key    = "clarity/terraform.tfstate"
-    region = "us-east-1"
+    region = "eu-west-2"
   }
 }
 
