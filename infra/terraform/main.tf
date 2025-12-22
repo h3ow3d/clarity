@@ -169,7 +169,6 @@ resource "aws_lambda_function" "submit_attempt" {
     variables = {
       ATTEMPTS_TABLE_NAME = aws_dynamodb_table.attempts.name
       BEDROCK_MODEL_ID    = "anthropic.claude-3-sonnet-20240229-v1:0"
-      AWS_REGION          = var.aws_region
     }
   }
 }
@@ -188,7 +187,6 @@ resource "aws_lambda_function" "get_attempt" {
   environment {
     variables = {
       ATTEMPTS_TABLE_NAME = aws_dynamodb_table.attempts.name
-      AWS_REGION          = var.aws_region
     }
   }
 }
@@ -207,7 +205,6 @@ resource "aws_lambda_function" "list_attempts" {
   environment {
     variables = {
       ATTEMPTS_TABLE_NAME = aws_dynamodb_table.attempts.name
-      AWS_REGION          = var.aws_region
     }
   }
 }
@@ -222,12 +219,6 @@ resource "aws_lambda_function" "list_scenarios" {
   runtime         = "nodejs20.x"
   timeout         = 5
   memory_size     = 256
-
-  environment {
-    variables = {
-      AWS_REGION = var.aws_region
-    }
-  }
 }
 
 # Lambda function for getting scenario
@@ -240,12 +231,6 @@ resource "aws_lambda_function" "get_scenario" {
   runtime         = "nodejs20.x"
   timeout         = 5
   memory_size     = 256
-
-  environment {
-    variables = {
-      AWS_REGION = var.aws_region
-    }
-  }
 }
 
 # API Gateway REST API
