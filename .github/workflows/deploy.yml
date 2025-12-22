@@ -46,7 +46,7 @@ jobs:
       - name: Deploy infrastructure
         uses: h3ow3d/h3ow3d-github-actions/actions/terraform-deploy@v1.0.0
         with:
-          terraform-version: '1.5.0'
+          terraform-version: '1.14.1'
           working-directory: 'infra/terraform'
           auto-approve: 'true'
 
